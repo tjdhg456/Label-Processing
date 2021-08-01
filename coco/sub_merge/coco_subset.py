@@ -105,11 +105,11 @@ if __name__=='__main__':
                         class_name_1)
     
     # Val
-    annotate_coco_subset(os.path.join(base, 'annotations', 'instances_train2017.json'),
-                        os.path.join(base, 'annotations', 'partial', 'part_0.9_train2017.json'),
+    annotate_coco_subset(os.path.join(base, 'annotations', 'instances_val2017.json'),
+                        os.path.join(base, 'annotations', 'partial', 'part_0.9_val2017.json'),
                         class_name_9)
 
-    annotate_coco_subset(os.path.join(base, 'annotations', 'instances_train2017.json'),
-                        os.path.join(base, 'annotations', 'partial', 'part_0.1_train2017.json'),
+    annotate_coco_subset(os.path.join(base, 'annotations', 'instances_val2017.json'),
+                        os.path.join(base, 'annotations', 'partial', 'part_0.1_val2017.json'),
                         class_name_1)
     
