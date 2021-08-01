@@ -82,11 +82,18 @@ def download_partial_coco(category, base_folder, save_folder):
         with open(os.path.join(base_folder, save_folder, im['file_name']), 'wb') as handler:
             handler.write(img_data)
 
-# base = '/SSD3/sung/dataset/assembly_assembly,number/'
-# annotate_coco_subset(os.path.join(base, 'annotations', 'assembly_train2017.json'),
-#                      os.path.join(base, 'annotations', 'assembly_train2017.json'),
-#                      ['assembly', 'number'])
-#
-# annotate_coco_subset(os.path.join(base, 'annotations', 'assembly_val2017.json'),
-#                      os.path.join(base, 'annotations', 'assembly_val2017.json'),
-#                      ['assembly', 'number'])
+
+if __name__=='__main__':
+base = '/data/sung/dataset/coco'
+class_path = os.path.join(base, 'coco_labels.txt')
+with open(class_path, 'r') as f:
+    class_name = f.readlines()
+
+
+annotate_coco_subset(os.path.join(base, 'annotations', 'assembly_train2017.json'),
+                     os.path.join(base, 'annotations', 'assembly_train2017.json'),
+                     ['assembly', 'number'])
+
+annotate_coco_subset(os.path.join(base, 'annotations', 'assembly_val2017.json'),
+                     os.path.join(base, 'annotations', 'assembly_val2017.json'),
+                     ['assembly', 'number'])
