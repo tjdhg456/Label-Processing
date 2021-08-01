@@ -17,6 +17,7 @@ import requests
 import os
 from tqdm import tqdm
 import json
+import numpy as np
 
 def annotate_coco_subset(ann_file, save_file, class_list):
     coco = COCO(ann_file)
@@ -28,8 +29,8 @@ def annotate_coco_subset(ann_file, save_file, class_list):
 
     # Update Class
     for ix, cls in enumerate(cat):
-        conversion[str(cls['id'])] = ix
-        cls['id'] = ix
+        conversion[str(cls['id'])] = ix+1   
+        cls['id'] = ix+1
         category.append(cls)
 
     # Load Annotation
@@ -84,16 +85,31 @@ def download_partial_coco(category, base_folder, save_folder):
 
 
 if __name__=='__main__':
-base = '/data/sung/dataset/coco'
-class_path = os.path.join(base, 'coco_labels.txt')
-with open(class_path, 'r') as f:
-    class_name = f.readlines()
+    base = '/data/sung/dataset/coco'
+    class_path = os.path.join(base, 'coco_labels.txt')
+    with open(class_path, 'r') as f:
+        class_name = f.readlines()
+    
+    class_name = [class_.strip().split(',')[-1] for class_ in class_name]
+    class_name_9 = np.random.choice(class_name, int(len(class_name) * 0.9), replace=False)
+    class_name_1 = np.array(list(set(class_name) - set(class_name_9)))
+    
 
+    # Train
+    annotate_coco_subset(os.path.join(base, 'annotations', 'instances_train2017.json'),
+                        os.path.join(base, 'annotations', 'partial', 'part_0.9_train2017.json'),
+                        class_name_9)
 
-annotate_coco_subset(os.path.join(base, 'annotations', 'assembly_train2017.json'),
-                     os.path.join(base, 'annotations', 'assembly_train2017.json'),
-                     ['assembly', 'number'])
+    annotate_coco_subset(os.path.join(base, 'annotations', 'instances_train2017.json'),
+                        os.path.join(base, 'annotations', 'partial', 'part_0.1_train2017.json'),
+                        class_name_1)
+    
+    # Val
+    annotate_coco_subset(os.path.join(base, 'annotations', 'instances_train2017.json'),
+                        os.path.join(base, 'annotations', 'partial', 'part_0.9_train2017.json'),
+                        class_name_9)
 
-annotate_coco_subset(os.path.join(base, 'annotations', 'assembly_val2017.json'),
-                     os.path.join(base, 'annotations', 'assembly_val2017.json'),
-                     ['assembly', 'number'])
+    annotate_coco_subset(os.path.join(base, 'annotations', 'instances_train2017.json'),
+                        os.path.join(base, 'annotations', 'partial', 'part_0.1_train2017.json'),
+                        class_name_1)
+    
