@@ -63,6 +63,37 @@ def annotate_coco_subclass(ann_file, save_file, class_list):
         json.dump(file, f)
 
 
+def annotate_coco_subimage(ann_file, save_file, prop=0.3):
+    # Load Annotation
+    coco = COCO(ann_file)
+    catId = coco.getCatIds()
+
+    # Load Image list
+    img_id_list = []
+    for c in catId:
+        img_id = coco.getImgIds(catIds=c)
+        img_id = list(np.random.choice(img_id, int(len(img_id) * prop), replace=False))
+        img_id_list += img_id    
+    
+    img_id_list = list(set(img_id_list))
+    img = coco.loadImgs(ids=img_id_list)
+
+    ann_id = coco.getAnnIds(imgIds=img_id_list)
+    ann = coco.loadAnns(ids=ann_id)
+    
+    # Load JSON
+    with open(ann_file, 'r') as f:
+        file = json.load(f)
+
+    # Update
+    file['images'] = img
+    file['annotations'] = ann
+
+    # Save JSON
+    with open(save_file, 'w') as f:
+        json.dump(file, f)
+
+
 def download_partial_coco(category, base_folder, save_folder):
     # instantiate COCO specifying the annotations json path
     coco = COCO(os.path.join(base_folder, 'annotations', 'instances_train2017.json'))
@@ -90,30 +121,42 @@ if __name__=='__main__':
     with open(class_path, 'r') as f:
         class_name = f.readlines()
     
+    # Option
+    split_category = False
+    split_image = True
+    
     # Select the Class
     np.random.seed(1222)
     class_name = [class_.strip().split(',')[-1] for class_ in class_name]
-    class_name_9 = np.random.choice(class_name, int(len(class_name) * 0.9), replace=False)
-    class_name_1 = np.array(list(set(class_name) - set(class_name_9)))
+    class_name_9 = sorted(np.random.choice(class_name, int(len(class_name) * 0.9), replace=False))
+    class_name_1 = sorted(np.array(list(set(class_name) - set(class_name_9))))
     
     ## Split the Category for Train / Val Samples
     # Train
-    annotate_coco_subclass(os.path.join(base, 'annotations', 'instances_train2017.json'),
-                           os.path.join(base, 'annotations', 'partial', 'part_0.9_train2017.json'),
+    if split_category:
+        annotate_coco_subclass(os.path.join(base, 'annotations', 'instances_train2017.json'),
+                            os.path.join(base, 'annotations', 'partial', 'part_0.9_train2017.json'),
+                                class_name_9)
+
+        annotate_coco_subclass(os.path.join(base, 'annotations', 'instances_train2017.json'),
+                            os.path.join(base, 'annotations', 'partial', 'part_0.1_train2017.json'),
+                            class_name_1)
+        
+        # Val
+        annotate_coco_subclass(os.path.join(base, 'annotations', 'instances_val2017.json'),
+                            os.path.join(base, 'annotations', 'partial', 'part_0.9_val2017.json'),
                             class_name_9)
 
-    annotate_coco_subclass(os.path.join(base, 'annotations', 'instances_train2017.json'),
-                           os.path.join(base, 'annotations', 'partial', 'part_0.1_train2017.json'),
-                           class_name_1)
-    
-    # Val
-    annotate_coco_subclass(os.path.join(base, 'annotations', 'instances_val2017.json'),
-                           os.path.join(base, 'annotations', 'partial', 'part_0.9_val2017.json'),
-                           class_name_9)
-
-    annotate_coco_subclass(os.path.join(base, 'annotations', 'instances_val2017.json'),
-                           os.path.join(base, 'annotations', 'partial', 'part_0.1_val2017.json'),
-                           class_name_1)
-    
+        annotate_coco_subclass(os.path.join(base, 'annotations', 'instances_val2017.json'),
+                            os.path.join(base, 'annotations', 'partial', 'part_0.1_val2017.json'),
+                            class_name_1)
+        
     ## Select the Partial Images
-    
+    if split_image:
+        ann_file = os.path.join(base, 'annotations', 'partial', 'part_0.1_train2017.json')
+        save_file = os.path.join(base, 'annotations', 'partial', 'part_0.1_sub_0.1_train2017.json')
+        annotate_coco_subimage(ann_file, save_file, prop=0.1)
+        
+        ann_file = os.path.join(base, 'annotations', 'partial', 'part_0.1_val2017.json')
+        save_file = os.path.join(base, 'annotations', 'partial', 'part_0.1_sub_0.1_val2017.json')
+        annotate_coco_subimage(ann_file, save_file, prop=0.1)
