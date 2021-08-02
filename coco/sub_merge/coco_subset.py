@@ -19,7 +19,7 @@ from tqdm import tqdm
 import json
 import numpy as np
 
-def annotate_coco_subset(ann_file, save_file, class_list):
+def annotate_coco_subclass(ann_file, save_file, class_list):
     coco = COCO(ann_file)
     catId = coco.getCatIds(catNms=class_list)
     cat = coco.loadCats(ids=catId)
@@ -90,26 +90,30 @@ if __name__=='__main__':
     with open(class_path, 'r') as f:
         class_name = f.readlines()
     
+    # Select the Class
+    np.random.seed(1222)
     class_name = [class_.strip().split(',')[-1] for class_ in class_name]
     class_name_9 = np.random.choice(class_name, int(len(class_name) * 0.9), replace=False)
     class_name_1 = np.array(list(set(class_name) - set(class_name_9)))
     
-
+    ## Split the Category for Train / Val Samples
     # Train
-    annotate_coco_subset(os.path.join(base, 'annotations', 'instances_train2017.json'),
-                        os.path.join(base, 'annotations', 'partial', 'part_0.9_train2017.json'),
-                        class_name_9)
+    annotate_coco_subclass(os.path.join(base, 'annotations', 'instances_train2017.json'),
+                           os.path.join(base, 'annotations', 'partial', 'part_0.9_train2017.json'),
+                            class_name_9)
 
-    annotate_coco_subset(os.path.join(base, 'annotations', 'instances_train2017.json'),
-                        os.path.join(base, 'annotations', 'partial', 'part_0.1_train2017.json'),
-                        class_name_1)
+    annotate_coco_subclass(os.path.join(base, 'annotations', 'instances_train2017.json'),
+                           os.path.join(base, 'annotations', 'partial', 'part_0.1_train2017.json'),
+                           class_name_1)
     
     # Val
-    annotate_coco_subset(os.path.join(base, 'annotations', 'instances_val2017.json'),
-                        os.path.join(base, 'annotations', 'partial', 'part_0.9_val2017.json'),
-                        class_name_9)
+    annotate_coco_subclass(os.path.join(base, 'annotations', 'instances_val2017.json'),
+                           os.path.join(base, 'annotations', 'partial', 'part_0.9_val2017.json'),
+                           class_name_9)
 
-    annotate_coco_subset(os.path.join(base, 'annotations', 'instances_val2017.json'),
-                        os.path.join(base, 'annotations', 'partial', 'part_0.1_val2017.json'),
-                        class_name_1)
+    annotate_coco_subclass(os.path.join(base, 'annotations', 'instances_val2017.json'),
+                           os.path.join(base, 'annotations', 'partial', 'part_0.1_val2017.json'),
+                           class_name_1)
+    
+    ## Select the Partial Images
     
