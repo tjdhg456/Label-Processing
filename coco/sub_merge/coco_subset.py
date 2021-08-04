@@ -122,7 +122,7 @@ if __name__=='__main__':
         class_name = f.readlines()
     
     # Option
-    split_category = False
+    split_category = True
     split_image = True
     
     # Select the Class
